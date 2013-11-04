@@ -1,0 +1,4 @@
+solrlogstash
+============
+
+solr-logstash
