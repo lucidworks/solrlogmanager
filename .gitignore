@@ -1,0 +1,7 @@
+.git
+.classpath
+.project
+/bin
+*.bak
+
+

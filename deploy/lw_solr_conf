@@ -1,0 +1,22 @@
+input {
+  file {
+      type => "syslog"
+    	exclude => ["*.gz","*.zip","*.tgz"]
+			# FYI - LogStash does not always recurse the directory hirearcy correctly on Windows
+			# unless the path is all lowercase.
+      path => [ "/logfilePath/**/./*" ]
+			sincedb_path => "/dev/null"
+    	start_position => "beginning"
+   }
+}
+# Add name=value pairs as fields
+filter {
+	kv{
+		add_field => [ "User_%{user}_says", "Hello world, from %{src_ip}" ]
+    add_tag => [ "new tag1", "new tag2" ]
+	}
+}
+output {
+  stdout { debug => true codec => "rubydebug"}
+  lucidworks_solr_lsv122 { collection_host => "127.0.0.1" collection_port => "8983" collection_name => "logstash_logs" field_prefix => "logstash_"}
+}
