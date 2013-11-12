@@ -1,6 +1,7 @@
 require "logstash/namespace"
 require "logstash/outputs/base"
 require "net/http"
+require "time"
 require "pry"
 
 require "lucidworks.jar"
@@ -46,19 +47,25 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
 		# If an incoming field does not exist in the Solr collection then addSolrDocument will attempt to create 
 		# a new field entry configured per the attributes defined in solrFieldCreationParams.  
 		# The format is:
-		#   field name - (note that preceeding and following spaces will be trimmed.)
+		#   field name - (note that preceding and following spaces will be trimmed.)
 		#   Solr field creation parameters for the named field.  Described using json format.
 		#
-		# Below we define the default LogStash field 'tags' to be multivalued and the field 'message' to be stored but not indexed.  
 		# Fields not described in the hash will be created with the following default Solr field definition 
-		#     "[{\"type\":\"text_en\",\"name\":\"" + keyName + "\",\"stored\":true,\"indexed\":true}]
+		#     "[{\"type\":\"text_en\",\"name\":\"" + fieldName + "\",\"stored\":true,\"indexed\":true}]
 		#
 		# User organizations can add to the hashmap configurations for LogStash fields that the organization would like
 		# defined differently than the default. 
 		
 		@solrFieldCreationParams = Hash.new
+		
+		# Tags are multivalued.
 		@solrFieldCreationParams["tags"] = "[{\"type\":\"text_en\",\"name\":\"tags\",\"stored\":true,\"indexed\":true,\"multiValued\":true}]"
+		
+		# Message stored but not indexed.
 		@solrFieldCreationParams["message"] = "[{\"type\":\"text_en\",\"name\":\"message\",\"stored\":true,\"indexed\":false}]"
+		
+		# The event timestamp is typed 'tdate'
+		@solrFieldCreationParams[@field_prefix + "timestamp"] = "[{\"type\":\"tdate\",\"name\":\"" + @field_prefix + "timestamp" + "\",\"stored\":true,\"indexed\":true}]"
 		
 		@solrFieldCreationParams = java.util.HashMap.new(@solrFieldCreationParams)
 		
@@ -88,7 +95,7 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
 			when "tags"
 				solrfields["#{key}"]= value.join(",")
 			when "@timestamp"		# Remove @ from field names because @ is invalid in Solr field names
-				solrfields[@field_prefix + "timestamp"] = "#{value}"
+				solrfields[@field_prefix + "timestamp"] = Time.parse("#{value}").iso8601
 			when "@version"
 				solrfields[@field_prefix + "version"] = "#{value}"
 			else
