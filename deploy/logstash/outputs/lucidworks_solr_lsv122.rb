@@ -58,11 +58,15 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
 		
 		@solrFieldCreationParams = Hash.new
 		
+		# Message is indexed for searching.  If you construct individual fields for all of the 
+		# meaningful data in the message you might want to set index to false to save space.
+    	@solrFieldCreationParams["message"] = "[{\"type\":\"text_general\",\"name\":\"message\",\"stored\":true,\"indexed\":true}]"
+
+		# Version is type long
+		@solrFieldCreationParams[@field_prefix + "version"] = "[{\"type\":\"long\",\"name\":\"" + @field_prefix + "version" + "\",\"stored\":true,\"indexed\":true}]"
+		
 		# Tags are multivalued.
 		@solrFieldCreationParams["tags"] = "[{\"type\":\"text_en\",\"name\":\"tags\",\"stored\":true,\"indexed\":true,\"multiValued\":true}]"
-		
-		# Message stored but not indexed.
-		@solrFieldCreationParams["message"] = "[{\"type\":\"text_en\",\"name\":\"message\",\"stored\":true,\"indexed\":false}]"
 		
 		# The event timestamp is typed 'tdate'
 		@solrFieldCreationParams[@field_prefix + "timestamp"] = "[{\"type\":\"tdate\",\"name\":\"" + @field_prefix + "timestamp" + "\",\"stored\":true,\"indexed\":true}]"

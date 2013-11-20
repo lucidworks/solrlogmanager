@@ -114,7 +114,7 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 			os.flush();
 			int respCode = conn.getResponseCode();
 			if (respCode != SOLR_RSP.DOCUMENTADDED.getValue()) {
-				throw new RuntimeException("Failed to add docs - " + doc + " - \n\n" + conn.getResponseMessage());
+				throw new RuntimeException("Failed to add document (possibly need to escape/transform/remove illegal character[s] in data prior to submission) - " + doc + " - \n\n" + conn.getResponseMessage());
 			}
 		} catch (Exception e) {
 			throw e;
@@ -128,11 +128,6 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 	 * Adds single document to the index. <p>
 	 * The 'id' field is mandatory.  If it does not appear in the eventlist then a GUIID will be created and used 
 	 * as the document id. <p>
-	 * 
-	 * Fields added to the schema with the following settings: <p>
-	 * <b>message</b> - type=text_en, stored=true <br>
-	 * <b>tags</b> - type=text_en, stored=true, indexed=true, multivalued=true <br>
-	 * <b>allOtherFields></b> - type=text_en, stored=true, indexed=true
 	 * 
 	 * @param event hashmap<String,String> of fieldname=value pairs.
 	 * @param  fieldCreationParams hashmap

@@ -2,7 +2,7 @@ input {
   file {
       type => "syslog"
     	exclude => ["*.gz","*.zip","*.tgz"]
-			# FYI - LogStash does not always recurse the directory hirearcy correctly on Windows
+			# FYI - LogStash does not always recurse the directory hierarchy correctly on Windows
 			# unless the path is all lowercase.
       path => [ "/logfilePath/**/./*" ]
 			sincedb_path => "/dev/null"
