@@ -106,8 +106,13 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
 				solrfields["#{key}"] = "#{value}"
 			end
 		}
+
+		begin
+			@lucidworks.addSolrDocument(java.util.HashMap.new(solrfields), @solrFieldCreationParams)
+		rescue
+
+		end
 		
-		@lucidworks.addSolrDocument(java.util.HashMap.new(solrfields), @solrFieldCreationParams)
 		#binding.pry
   end # def receive
 end	
