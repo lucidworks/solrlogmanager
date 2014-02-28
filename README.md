@@ -3,19 +3,13 @@ Solr Log Manager
 
 This is an implementation of a LogStash output plugin that delivers log data to Solr.  
 
-The logstash_deploy folder contains a working version of the plugin components and also includes a version of LogStash.  See the 
-ReadMe in the logstash_deploy folder for instruction on how to install and run.   
 
-To build the lucidworks.jar yourself from within the src folder: 
-	javac javac *.java
-	jar cvf lucidworks.jar *.class
-	
-# QUICKSTART
+### QUICKSTART
 
 
-1. Copy the logstash_deploy folder to your disk. You will run LogStash and the Solr Output Writer from this directory.
+1. Copy the logstash_deploy folder to your disk. This contains a working version of LogStash and you can run LogStash and the Solr Output Writer from this directory.
 
-2. Copy provided ManagedIndexSchemaFactory configured logstash_logs directory to your Solr collection folder.  
+2. Copy provided ManagedIndexSchemaFactory configured logstash_logs directory to your Solr collection folder.  If you rename the folder, also appropriately modify the core.properties.
 
 3. If you are on a older version of Solr (before 4.4), go to the Solr Admin Page and add a new core.  In the name and instanceDir fields enter: logstash_logs. Accept the defaults for the remaining fields and click on the 'Add Core' button.
 
@@ -34,3 +28,13 @@ This will make sure you are faceting correctly on the program field.
 Log data should be displaying in your shell window and it should be getting stored in Solr.
 
 Happy Logging!
+
+
+### More Information
+
+For convenience, this QuickStart Information is also included inside the logstash_deploy folder. The README.txt within that folder contains more details about configuring and running LogStash and writing to Solr.   
+
+To build the lucidworks.jar yourself from within the src folder: 
+	javac javac *.java
+	jar cvf lucidworks.jar *.class
+	

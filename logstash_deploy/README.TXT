@@ -1,7 +1,7 @@
 Instructions 
 
 This document details how to use LogStash with Solr.  This release has been tested with:
- 	Solr version 4.4.0
+ 	Solr version 4.4.0, 4.5.0 and 4.6.x
  	LogStash version 1.2.2
  	Java 1.6.0
 
@@ -33,10 +33,12 @@ This document details how to use LogStash with Solr.  This release has been test
        dataDir: data
        config: solrconfig.xml
        schema: schema.xml
+    
+    Note that later versions of Solr automatically detect cores. Also, if you are running SolrCloud, you will need to either bootstrap the configuration at startup or upload the configuration to zookeeper and then specify it when creating a collection. 
  
-2) Copy lucidworks.jar to the directory where you will execute the LogStash jar file (logstash-1.2.2-flatjar.jar or later).
+2) Copy lucidworks.jar to the directory where you will execute the LogStash jar file (logstash-1.2.2-flatjar.jar or later). If you use the logstash_deploy directory as is this is already done for you.
 
-3) Copy lucidworks_solr_lsv122.rb to your LogStash outputs directory.  This is typically in path "./locationOfLogstashJar/logstash/outputs".
+3) Copy lucidworks_solr_lsv122.rb to your LogStash outputs directory.  This is typically in path "./<locationOfLogstashJar>/logstash/outputs". If you use the logstash_deploy directory as is this is already done for you.
    As the name indicates this version of the Ruby file is targeted at LogStash version 1.2.2.  
    
    The receive method converts the event argument received from LogStash into a hash of fieldname=fieldvalue pairs and passes this to
@@ -96,11 +98,12 @@ This document details how to use LogStash with Solr.  This release has been test
   	collection_host - address of solr instance.  Defaults is 'localhost'.
 	  collection_port - port for sending rest messages to solr instance.  Solr default is 8983.
 	  collection_name - name of existent collection that will receive new documents. Default is 'collection1'.
-  	field_prefix    - LogStash @timestamp and @version will be renamed [field_prefix]timestamp and [field_prefix]version.  Default is "logstash_".
+  	field_prefix    - LogStash @timestamp and @version will be renamed [field_prefix]timestamp and [field_prefix]version.  Default is "event_".
+  	
+  	The other example configuration file that works with MacOS Syslogs is referenced in QuickStart.txt.
 
 5) From within the directory where lucidworks.jar, dist subdirectory and logstash.jar are loacated execute LogStash.  
        Example: java -jar logstash-1.2.2-flatjar.jar agent -f lw_solr_conf -p .  
 
-   Captured log data should now be saved and retrivable from your solr instance.  If debug is true in the config files output then you 
-   should see each processed document's data displayed in the console window.
+   Captured log data should now be saved and retrivable from your solr instance.  If debug is true in the config files output then you should see each processed document's data displayed in the console window.
 
