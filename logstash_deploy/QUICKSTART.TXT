@@ -1,11 +1,10 @@
 Quickstart 
 
-1. Copy the deploy folder to your disk.
+1. Copy the logstash_deploy folder to your disk or check it out of github
 
 2. Copy provided ManagedIndexSchemaFactory configured logstash_logs directory to your Solr collection folder.  
 
-3. In Solr Admin add a new core.  In the name and instanceDir fields enter: logstash_logs. Accept the defaults
-   for the remaining fields and click on the 'Add Core' button.
+3. In Solr Admin add a new core.  In the name and instanceDir fields enter: logstash_logs. Accept the defaults for the remaining fields and click on the 'Add Core' button (NOT NECESSARY for Solr 4.5 onwards).
 
 4. For a start-up example, we will use syslogs:
    Open lw_solr_syslog.conf in a text editor.  In the 'input' section of the config file add the path to your log file[s] by changing 
@@ -19,10 +18,10 @@ Quickstart
    patterns 'a=b=c' for example which can result in invalid Solr field names.  Modify the filters in the config file as necessary to perform 
    LogStash transformations consistent with the data coming from your environment (for details on LogStash configuration see http://logstash.net/docs/1.2.2/).
    
-5. Download LogStash to the deploy folder - https://download.elasticsearch.org/logstash/logstash/logstash-1.2.2-flatjar.jar (NO LONGER NECESSARY)
+5. Download LogStash to the deploy folder - https://download.elasticsearch.org/logstash/logstash/logstash-1.2.2-flatjar.jar (NO LONGER NECESSARY, it included in this repository)
 
-6. For the Sylog example, execute the following curl command
-curl 'http://localhost:7777/solr/logstash_logs/schema/fields' -X POST -H 'Content-type: application/json' --data-binary '
+6. For the Sylog example, execute the following curl command (making sure to change the port)
+curl 'http://localhost:8983/solr/logstash_logs/schema/fields' -X POST -H 'Content-type: application/json' --data-binary '
 [{"name":"syslog_program","type":"string","indexed":true,"stored":true, "copyFields":["logtext"]}]'
  
 6. Execute LogStash: java -jar logstash-1.2.2-flatjar.jar agent -f lw_solr_syslog.conf -p .
