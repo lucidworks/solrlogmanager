@@ -21,4 +21,3 @@ This will make sure you are faceting correctly on the program field.
 Log data should be displaying in your shell window and it should be getting stored in Solr.
 
 Happy Logging!
-Happy Logging!
