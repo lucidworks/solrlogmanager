@@ -20,7 +20,7 @@ If your Solr instance is not running on the default localhost:8983 then change t
 
 5. For the Sylog example, execute the following curl command (making sure to change the port)
 curl 'http://localhost:8983/solr/logstash_logs/schema/fields' -X POST -H 'Content-type: application/json' --data-binary '
-[{"name":"syslog_program","type":"string","indexed":true,"stored":true, "copyFields":["logtext"]}]'
+[{"name":"syslog_program","type":"string","indexed":true,"stored":true}]'
 This will make sure you are faceting correctly on the program field.
  
 6. Execute LogStash: java -jar logstash-1.2.2-flatjar.jar agent -f lw_solr_syslog.conf -p .
