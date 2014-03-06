@@ -61,7 +61,11 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 	private void createSchemaField(String key, String val) throws Exception {
 		HttpURLConnection conn = null;
 		try {
-			URL url = new URL(fieldsPath + "/" + key);
+			// Solr will throw an exception if you try to explicitly create a field that matches a configured dynamic field pattern.
+			// By using 'includeDynamic=true' fields whose name matches a configured dynamic field pattern will be reported by the 
+			// server as existent even if they do not yet exist literally.  Then we skip creation here and let the field be created 
+			// and typed dynamically when the document is saved in another method. 
+			URL url = new URL(fieldsPath + "/" + key + "?includeDynamic=true");
 			
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
