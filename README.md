@@ -23,7 +23,7 @@ curl 'http://localhost:8983/solr/logstash_logs/schema/fields' -X POST -H 'Conten
 [{"name":"syslog_program","type":"string","indexed":true,"stored":true}]'
 This will make sure you are faceting correctly on the program field.
  
-6. Execute LogStash: java -jar logstash-1.2.2-flatjar.jar agent -f lw_solr_syslog.conf -p .
+6. Execute LogStash: java -jar logstash-1.3.3-flatjar.jar agent -f lw_solr_syslog.conf -p .
 
 Log data should be displaying in your shell window and it should be getting stored in Solr.
 

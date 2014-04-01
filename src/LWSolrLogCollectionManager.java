@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * LWSolrLogCollectionManager
  * @author  MH
- * @version 1.0 
+ * @version 1.1 
  * @since 2013 
 */
 
@@ -42,14 +42,18 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 		public int getValue() { return id; }
 	}
 
-	public void init(String host, int pt, String collection) {
+	public void init(String host, int pt, String collection, boolean forceCommit) {
 		String port = String.valueOf(pt);
+		String update = "/update";
+		
+		if (forceCommit)
+			update = "/update/?commit=true";
 		
 		// Note the Solr documentation examples do not include the collection.  But if
 		// if collection is left out then new records are not added to the index because 
 		// the fields are not found even though they do somehow appear in the managed-schema file.
 		fieldsPath = "http://" + host + ":" + port + "/solr/" + collection + "/schema/fields";
-		addNewDocPath = "http://" + host + ":" + port + "/solr/" + collection + "/update/?commit=true";
+		addNewDocPath = "http://" + host + ":" + port + "/solr/" + collection + update;
 	}
 
 	/**
@@ -58,7 +62,7 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 	 * @param val the field creation string.
 	 * @throws Exception
 	 */
-	private void createSchemaField(String key, String val) throws Exception {
+	public void createSchemaField(String key, String val) throws Exception {
 		HttpURLConnection conn = null;
 		try {
 			// Solr will throw an exception if you try to explicitly create a field that matches a configured dynamic field pattern.
@@ -99,11 +103,7 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 		}
 	}
 
-	/**
-	 * Perform rest calls that add the new document. <p>
-	 * 
-	 */
-	private void addDoc(String doc) throws Exception {
+	public void flushDocs(String documents) throws Exception {
 		HttpURLConnection conn = null;
 
 		try {
@@ -113,13 +113,16 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "text/xml");
 			OutputStream os = conn.getOutputStream();
-					
-			os.write(doc.getBytes());
+			
+			// Wrap collection of documents 
+			String s = "<add>" + documents + "</add>";
+			os.write(s.getBytes());
 			os.flush();
 			int respCode = conn.getResponseCode();
 			if (respCode != SOLR_RSP.DOCUMENTADDED.getValue()) {
-				throw new RuntimeException("Failed to add document (possibly need to escape/transform/remove illegal character[s] in data prior to submission) - " + doc + " - \n\n" + conn.getResponseMessage());
+				throw new RuntimeException("Failed to add documents (possibly need to escape/transform/remove illegal character[s] in data prior to submission) - " + s + " - \n\n" + conn.getResponseMessage());
 			}
+//			LOG.info("Flushed docs = " + s.toString());
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -127,29 +130,15 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 				conn.disconnect();
 		}
 	}
-
-	/**
-	 * Adds single document to the index. <p>
-	 * The 'id' field is mandatory.  If it does not appear in the eventlist then a GUIID will be created and used 
-	 * as the document id. <p>
-	 * 
-	 * @param event hashmap<String,String> of fieldname=value pairs.
-	 * @param  fieldCreationParams hashmap
-	 * @throws Exception
-	 */
-	public void addSolrDocument(HashMap <String, String> event, HashMap <String, String> fieldCreationParams) throws Exception {
+	
+	public String createSolrDocument(HashMap <String, String> event) throws Exception {
 		String id = "";
 		StringBuffer s = new StringBuffer();
-		s.append("<add><doc>");
+		s.append("<doc>");
 
-		// Prepare event fields
+		// Check for proper encoding and create field's for tags.
 		for (Map.Entry<String, String> entry : event.entrySet()) {
 			String key = entry.getKey().toLowerCase().trim();
-			
-			String param = (fieldCreationParams.get(key) == null) ? 
-					"[{\"type\":\"text_en\",\"name\":\"" + key + "\",\"stored\":true,\"indexed\":true}]" : fieldCreationParams.get(key);
-			
-			createSchemaField(key, param);
 			
 			if ("id".equals(key)) {
 				id = checkURLEncode((String)entry.getValue());
@@ -162,8 +151,10 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 			}
 		}
 		id = id.isEmpty() ? genId() : id;
-		s.append("<field name=\"id\">" + id + "</field></doc></add>");
-		addDoc(s.toString());
+		s.append("<field name=\"id\">" + id + "</field></doc>");
+		
+//		LOG.info("Added doc = " + s.toString());
+		return s.toString();
 	}
 }
 

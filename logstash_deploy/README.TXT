@@ -1,15 +1,35 @@
 Instructions 
 
 This document details how to use LogStash with Solr.  This release has been tested with:
- 	Solr version 4.4.0, 4.5.0 and 4.6.x
- 	LogStash version 1.2.2
+ 	Solr version 4.4.0, 4.5.0, 4.6.0, 4.7.0
+ 	LogStash version 1.3.3
  	Java 1.6.0
 
 1) Create a collection to hold the log event data.  
    
-   The application creates new fields dynamically.  It requires the solrconfig.xml file 
-   contian an active ManagedIndexSchemaFactory.  Insure that a properly configured solrconfig.xml
-   exists in the collection's conf directory. 
+   	It is now the expectation that the collection uses either a managed_schema or that the user has created an appropriate 
+   	unmanaged schema for receipt of new fields.  With the exception of the two mandatory fields @timestamp and @version 
+   	the application will not itself attempt to directly use the Solr api to explicitly create fields.
+    
+	For the mandatory fields @timestamp and @version the program will check for their existence at startup and if these fields 
+   	do not exist then it will attempt to create them with the following types: 
+
+	Timestamp
+		type: tdate
+		name: appends prefix value from config file or logstash_ by default to 'timestamp'. ex: logstash_timestamp
+		stored: true
+		indexed: true
+	
+	Version
+		type: long
+		name: appends prefix value from config file or logstash_ by default to 'version'.  ex: logstash_version
+		stored: true
+		indexed: true
+
+	These type definitions can be changed in the file lucidworks_solr_lsv133.rb.    
+	
+	Setup a managed schema in solrconfig.xml file by including an active ManagedIndexSchemaFactory.  The xml file is located
+	in the collection's conf directory. 
  
    Example:
 	   <schemaFactory class="ManagedIndexSchemaFactory">
@@ -20,11 +40,10 @@ This document details how to use LogStash with Solr.  This release has been test
    For more information see - http://svn.apache.org/repos/asf/lucene/dev/trunk/solr/example/solr/collection1/conf/solrconfig.xml
 
    An example collection folder named 'logstash_logs' is provided for use as a starter.  Note that it is 
-   based on Solr version 4.4.0.  If you use a different version then you should use files from your distribution for your starting point
-   (remember to use a managed solrconfig).  
+   based on Solr version 4.4.0.  If you use a different version then you should use files from your distribution for your starting point.
    
    Copy the logstash_logs folder to the directory where your solr collections are stored.  With this 'skeleton' in place use the Solr admin tool 
-   to create a new collection.  In the 'instance dir' field enther logstash_logs.  
+   to create a new collection.  In the 'instance dir' field enter logstash_logs.  
    
    Example admin new core parameters:
    
@@ -36,52 +55,26 @@ This document details how to use LogStash with Solr.  This release has been test
     
     Note that later versions of Solr automatically detect cores. Also, if you are running SolrCloud, you will need to either bootstrap the configuration at startup or upload the configuration to zookeeper and then specify it when creating a collection. 
  
-2) Copy lucidworks.jar to the directory where you will execute the LogStash jar file (logstash-1.2.2-flatjar.jar or later). If you use the logstash_deploy directory as is this is already done for you.
+2) Copy lucidworks.jar to the directory where you will execute the LogStash jar file (logstash-1.3.3-flatjar.jar or later). If you use the logstash_deploy directory as is this is already done for you.
 
-3) Copy lucidworks_solr_lsv122.rb to your LogStash outputs directory.  This is typically in path "./<locationOfLogstashJar>/logstash/outputs". If you use the logstash_deploy directory as is this is already done for you.
-   As the name indicates this version of the Ruby file is targeted at LogStash version 1.2.2.  
+3) Copy lucidworks_solr_lsv133.rb to your LogStash outputs directory.  This is typically in path "./<locationOfLogstashJar>/logstash/outputs". If you use the logstash_deploy directory as is this is already done for you.
+   As the name indicates this version of the Ruby file is targeted at LogStash version 1.3.3.  
    
    The receive method converts the event argument received from LogStash into a hash of fieldname=fieldvalue pairs and passes this to
-   the Solr jar.  The user can modify this file to suit their specific needs.  Examples of why the user organization might want 
-   to make modifications include:
-     
-      a) @ is an illeagal Solr fieldname character.  The Ruby module replaces the @ on LogStash @version and @timestamp with a user specified prefix.  
-      	 The user sets the desired prefix with an argument in the LogStash config file (see conf settings below).  In the event that LogStash
-         makes unexpected schema change in the future that adds illegal Solr fieldname characters to field names then Ruby file needs to adjust this.
-            
-      b) The user's LogStash config creates other tag-like arrays.  The array items need to be broken out 
-         as name value pairs.  
-      
-      c) Solr documents require a unique ID.  The Solr jar createa a GUIID automatically for each document added.  
-         If you want to manage your own ID's or overwrite data in an existing document then you can add a field named 'id' and the appropriate
-         value to the collection that gets passed to addSolrDocument() call.
+   lucidworks.jar. 
          
-      d) If a new field is not already in the collection then the field will be explicitly and automatically defined in the schema before the value 
-         is saved.  The parameters for the field definition's are defined in @solrFieldCreationParams variable.  By default fields 'message' 
-         and 'tags' use unique confirgurations.  All other fields are given the same default definition:
-         
-         	tags = "[{\"type\":\"text_en\",\"name\":\"tags\",\"stored\":true,\"indexed\":true,\"multiValued\":true}]"
-         	message = "[{\"type\":\"text_en\",\"name\":\"message\",\"stored\":true,\"indexed\":false}]"
-         	everythingElse = "[{\"type\":\"text_en\",\"name\":\"" + key + "\",\"stored\":true,\"indexed\":true}]"
-         
-         See lucidworks_solr_lsv122.rb for instruction about how to add your own specific definitions for one or more of the fields found 
-         in your unique environment.
-           
-                  
 4) Add lucidworks_solr output definition to logstash configuration file.  An example file lw_solr_conf is included
    with the distribution.  To use, point the path parameter at your log file location.
    
-  input {
-    file {
-      type => "syslog"
-    	exclude => ["*.gz","*.zip","*.tgz"]
-			# FYI - LogStash does not always recurse the directory hirearcy correctly on Windows
-			# unless the path is all lowercase.
-      path => [ "/logfilePath/**/./*" ]
+	input {
+   		file {
+      		type => "syslog"
+    		exclude => ["*.gz","*.zip","*.tgz"]
+      		path => "/logfilePath/**/./*" 
 			sincedb_path => "/dev/null"
-    	start_position => "beginning"
-    }
-  }
+    		start_position => "beginning"
+    	}
+  	}
 	# Create fields for all name=value pairs found in message.  Add a new field and tag just for fun.
 	filter {
 		kv{
@@ -90,20 +83,76 @@ This document details how to use LogStash with Solr.  This release has been test
 		}  
 	}
 	output {
-	  stdout { debug => true codec => "rubydebug"}
- 		lucidworks_solr_lsv122 { collection_host => "127.0.0.1" collection_port => "8983" collection_name => "logstash_logs" field_prefix => "logstash_"}
-  }
+	  	stdout { debug => true codec => "rubydebug"}
+   		lucidworks_solr_lsv133_work_in_progress { collection_host => "localhost" collection_port => "8888" collection_name => "searchlogs" field_prefix => "event_" force_commit => false flush_size => 1000 idle_flush_time => 1 }
+  	}
 
-  Where:
-  	collection_host - address of solr instance.  Defaults is 'localhost'.
-	  collection_port - port for sending rest messages to solr instance.  Solr default is 8983.
-	  collection_name - name of existent collection that will receive new documents. Default is 'collection1'.
-  	field_prefix    - LogStash @timestamp and @version will be renamed [field_prefix]timestamp and [field_prefix]version.  Default is "event_".
+
+Where:
+	output {
+		lucidworks_solr_lsv133 {
+	    	collection_host => ... # string (optional), default: "localhost"
+			collection_port => ... # number (optional), default: 8983
+			collection_name => ... # string (optional), default: "collection1"
+			field_prefix => ... # string (optional), default: "logstash_"
+			force_commit => ... # boolean (optional), default: false
+			flush_size => ... # number (optional), default: 100
+			idle_flush_time => ... # number (optional), default: 1
+		}
+	}
+	
+  	collection_host
+  		Value type is string 
+  		Default is localhost
+  		 
+  	Address of solr instance.  
   	
-  	The other example configuration file that works with MacOS Syslogs is referenced in QuickStart.txt.
-
-5) From within the directory where lucidworks.jar, dist subdirectory and logstash.jar are loacated execute LogStash.  
+  	collection_port
+  		Value type is string
+  		Default is 8983
+  		
+  	Port for sending rest messages to solr instance.
+  	
+  	collection_name
+  		Value type is string
+  		Default is collection1
+  		
+  	Name of existent collection that will receive new documents. 
+  	
+   	field_prefix
+   		Value type is string
+   		Default is logstash_
+   		
+    LogStash @timestamp and @version will be renamed [field_prefix]timestamp and [field_prefix]version.
+ 
+ 	force_commit
+		Value type is boolean
+		Default is false
+		
+	If true then a commit request will be sent to Solr for each batch of documents uploaded.  If false then 
+	the documents will be committed per the Solr instance's configured commit policy.
+	
+	The lucidworks_solr_lsv133 output uses Logstash's stud buffer to handle buffering events for batched document uploads.  The next two 
+	field values get passed to the buffer manager.
+	
+	flush_size
+	  Value type is number
+	  Default is 100
+	  
+	Number of events to queue up before writing to Solr.  The implementation uses Logstash's stud event buffering.
+	
+	idle_flush_time
+	  Value type is number
+	  Default is 1
+	  
+	Amount of time in seconds since the last flush before a flush is done even if the number of buffered events is smaller than flush_size   
+  
+5) From within the directory where lucidworks.jar, dist subdirectory and logstash.jar are located execute LogStash.  
        Example: java -jar logstash-1.2.2-flatjar.jar agent -f lw_solr_conf -p .  
 
-   Captured log data should now be saved and retrivable from your solr instance.  If debug is true in the config files output then you should see each processed document's data displayed in the console window.
+   If debug is true in the config files output then you should see each processed document's data displayed in the console window.
+   Captured log data should now be in your Solr instance.  
 
+
+ 	
+ 

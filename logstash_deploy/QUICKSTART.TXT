@@ -8,15 +8,18 @@ QuickStart
 
 4. For a start-up example, we will use syslogs:
    Open lw_solr_syslog.conf in a text editor.  In the 'input' section of the config file add the path to your log file[s] by changing path => [ "/var/log/system.log" ]
-If your Solr instance is not running on the default localhost:8983 then change the collection_host and collection_port values in the 
-   ouptut section of the config file.
+   
+   If your Solr instance is not running on the default localhost:8983 then change the collection_host and collection_port values in the 
+   output section of the config file.
 
 5. For the Sylog example, execute the following curl command (making sure to change the port)
-curl 'http://localhost:8983/solr/logstash_logs/schema/fields' -X POST -H 'Content-type: application/json' --data-binary '
-[{"name":"syslog_program","type":"string","indexed":true,"stored":true, "copyFields":["logtext"]}]'
-This will make sure you are faceting correctly on the program field.
+
+	curl 'http://localhost:8983/solr/logstash_logs/schema/fields' -X POST -H 'Content-type: application/json' --data-binary '
+	[{"name":"syslog_program","type":"string","indexed":true,"stored":true, "copyFields":["logtext"]}]'
+
+	This will make sure you are faceting correctly on the program field.
  
-6. Execute LogStash: java -jar logstash-1.2.2-flatjar.jar agent -f lw_solr_syslog.conf -p .
+6. Execute LogStash: java -jar logstash-1.3.3-flatjar.jar agent -f lw_solr_syslog.conf -p .
 
 Log data should be displaying in your shell window and it should be getting stored in Solr.
 
