@@ -32,7 +32,7 @@ Happy Logging!
 
 ### More Information
 
-For convenience, this QuickStart Information is also included inside the logstash_deploy folder. The README.txt within that folder contains more details about configuring and running LogStash and writing to Solr.   
+The MANUAL.txt file located in the logstash_deploy folder contains more details about configuring and running LogStash and writing to Solr.   
 
 To build the lucidworks.jar yourself from within the src folder: 
 	javac javac *.java

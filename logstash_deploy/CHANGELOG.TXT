@@ -1,4 +1,4 @@
-beta.0.2 (March 27, 2014)
+1.0.0 (March 27, 2014)
   # General
   -  With the exception of the @timestamp and @version fields [see below] the application will no longer try and 
   	explicitly create fields dynamically.  Collections must either use a managed_schema or an appropriately configured 
