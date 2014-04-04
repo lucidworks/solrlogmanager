@@ -81,6 +81,9 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 				//LOG.info("Attempting to create schema field - " + url.getPath() + ",  CreateString = " + val);
 				
 				conn.disconnect();
+				
+				val = "[{" + val + "}]";
+				
 				url = new URL(fieldsPath);
 				conn = (HttpURLConnection) url.openConnection();
 				conn.setDoOutput(true);
