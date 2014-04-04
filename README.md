@@ -35,6 +35,6 @@ Happy Logging!
 The MANUAL.txt file located in the logstash_deploy folder contains more details about configuring and running LogStash and writing to Solr.   
 
 To build the lucidworks.jar yourself from within the src folder: 
-	javac javac *.java
+	javac *.java
 	jar cvf lucidworks.jar *.class
 	

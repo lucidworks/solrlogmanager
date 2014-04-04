@@ -84,7 +84,7 @@ This document details how to use LogStash with Solr.  This release has been test
 	}
 	output {
 	  	stdout { debug => true codec => "rubydebug"}
-   		lucidworks_solr_lsv133_work_in_progress { collection_host => "localhost" collection_port => "8888" collection_name => "searchlogs" field_prefix => "event_" force_commit => false flush_size => 1000 idle_flush_time => 1 }
+   		lucidworks_solr_lsv133 { collection_host => "localhost" collection_port => "8888" collection_name => "searchlogs" field_prefix => "event_" force_commit => false flush_size => 1000 idle_flush_time => 1 }
   	}
 
 
@@ -148,7 +148,7 @@ Where:
 	Amount of time in seconds since the last flush before a flush is done even if the number of buffered events is smaller than flush_size   
   
 5) From within the directory where lucidworks.jar, dist subdirectory and logstash.jar are located execute LogStash.  
-       Example: java -jar logstash-1.2.2-flatjar.jar agent -f lw_solr_conf -p .  
+       Example: java -jar logstash-1.3.3-flatjar.jar agent -f lw_solr_conf -p .  
 
    If debug is true in the config files output then you should see each processed document's data displayed in the console window.
    Captured log data should now be in your Solr instance.  
