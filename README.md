@@ -36,5 +36,6 @@ The MANUAL.txt file located in the logstash_deploy folder contains more details 
 
 To build the lucidworks.jar yourself from within the src folder: 
 	javac *.java
+
 	jar cvf lucidworks.jar *.class
 	
