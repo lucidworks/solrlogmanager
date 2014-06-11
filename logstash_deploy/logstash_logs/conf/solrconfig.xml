@@ -364,7 +364,7 @@
          have some sort of hard autoCommit to limit the log size.
       -->
     <autoCommit>
-      <maxTime>15000</maxTime>
+      <maxDocs>100000</maxDocs>
       <openSearcher>false</openSearcher>
     </autoCommit>
 
@@ -372,12 +372,12 @@
          'soft' commit which only ensures that changes are visible
          but does not ensure that data is synced to disk.  This is
          faster and more near-realtime friendly than a hard commit.
+         Set here to 1 min.
       -->
-    <!--
+    
       <autoSoftCommit> 
-        <maxTime>1000</maxTime> 
+        <maxTime>60000</maxTime> 
       </autoSoftCommit>
-     -->
 
     <!-- Update Related Event Listeners
          
