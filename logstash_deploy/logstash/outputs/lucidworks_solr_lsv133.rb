@@ -33,6 +33,9 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
   # Prefix will replace the @ in logstash fieldnames @timestash and @version.
   config :field_prefix, :validate => :string, :default => "logstash_"
  
+  # Webapp name 
+  config :webapp_name, :validate => :string, :default => "solr"
+  
   # Solr solrconfig.xml can be configured to automatically commit documents after a 
   # specified amount of time or after receipt of a maximum number of documents.  For convenience 
   # allow the logger to override this setting for use in cases where the site either isn't 
@@ -62,7 +65,7 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
     # have Solr create them.
     #
    
-    @lucidworks.init(@collection_host, @collection_port, @collection_name, @force_commit)
+    @lucidworks.init(@collection_host, @collection_port, @collection_name, @force_commit, @webapp_name)
  
   	@lucidworks.createSchemaField(@field_prefix + "timestamp", "\"type\":\"tdate\",\"name\":\"" + @field_prefix + "timestamp" + "\",\"stored\":true,\"indexed\":true")
   	@lucidworks.createSchemaField(@field_prefix + "version", "\"type\":\"long\",\"name\":\"" + @field_prefix + "version" + "\",\"stored\":true,\"indexed\":true")
