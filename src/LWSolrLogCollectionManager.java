@@ -42,7 +42,7 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 		public int getValue() { return id; }
 	}
 
-	public void init(String host, int pt, String collection, boolean forceCommit) {
+	public void init(String host, int pt, String collection, boolean forceCommit, String webappName) {
 		String port = String.valueOf(pt);
 		String update = "/update";
 		
@@ -52,8 +52,8 @@ public class LWSolrLogCollectionManager extends CollectionManager{
 		// Note the Solr documentation examples do not include the collection.  But if
 		// if collection is left out then new records are not added to the index because 
 		// the fields are not found even though they do somehow appear in the managed-schema file.
-		fieldsPath = "http://" + host + ":" + port + "/solr/" + collection + "/schema/fields";
-		addNewDocPath = "http://" + host + ":" + port + "/solr/" + collection + update;
+		fieldsPath = "http://" + host + ":" + port + "/" + webappName + "/" + collection + "/schema/fields";
+		addNewDocPath = "http://" + host + ":" + port + "/" + webappName + "/" + collection + update;
 	}
 
 	/**

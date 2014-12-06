@@ -36,6 +36,9 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
   # Prefix will replace the @ in logstash fieldnames @timestash and @version.
   config :field_prefix, :validate => :string, :default => "logstash_"
   
+  # Webapp name 
+  config :webapp_name, :validate => :string, :default => "solr"
+  
 	@lucidworks
 	@solrFieldCreationParams
 		 
@@ -73,7 +76,7 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
 		
 		@solrFieldCreationParams = java.util.HashMap.new(@solrFieldCreationParams)
 		
-		@lucidworks.init(@collection_host, @collection_port, @collection_name)
+		@lucidworks.init(@collection_host, @collection_port, @collection_name, false, @webapp_name)
   end # def register
 
   public
