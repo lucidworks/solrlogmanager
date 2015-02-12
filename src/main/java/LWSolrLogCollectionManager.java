@@ -110,10 +110,11 @@ public class LWSolrLogCollectionManager {
    */
   public void createSchemaField(String key, String val) throws Exception {
 
-    SolrParams params = new ModifiableSolrParams();
+    ModifiableSolrParams params = new ModifiableSolrParams();
     //TODO: add the fields
     SolrRequest request = new QueryRequest(params);
     //request.setMethod(SolrRequest.METHOD.POST);
+    //params.add();
     request.setPath(fieldsPath);
 
     solr.request(request);
