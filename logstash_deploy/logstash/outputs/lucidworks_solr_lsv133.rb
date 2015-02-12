@@ -106,8 +106,8 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
     }
     
     begin
-      s = @lucidworks.createSolrDocument(java.util.HashMap.new(solrfields))
-      buffer_receive(s)
+      s = @lucidworks.addSolrDocument(java.util.HashMap.new(solrfields))
+      #buffer_receive(s)
     rescue Exception => e
       puts "Exception occured constructing new solr document - " + e.message  
     end
@@ -115,7 +115,9 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
   end # def receive
   
   def flush(events, teardown=false)
-  	begin 
+    # TODO: LET SOLR HANDLE THIS STUFF
+=begin
+  	begin
    		documents = "" 
     	events.each do |event|
     		documents += event
@@ -126,5 +128,6 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
   	rescue Exception => e
     	@logger.warn("An error occurred while flushing events: #{e.message}")
 		end
+=end
   end #def flush
 end 
