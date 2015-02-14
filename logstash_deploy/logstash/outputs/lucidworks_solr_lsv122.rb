@@ -9,7 +9,7 @@ require "lucidworks.jar"
 
 # LucidWorks output that pushes Logstash collected logs to Solr. 
 #
-# You can learn more about LucidWorks and Solr at <http://www.lucidworks.com/>
+# You can learn more about Lucidworks and Solr at <http://www.lucidworks.com/>
 class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
 
   config_name "lucidworks_solr_lsv122"

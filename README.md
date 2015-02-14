@@ -9,9 +9,11 @@ This is an implementation of a LogStash output plugin that delivers log data to 
 
 1. Copy the logstash_deploy folder to your disk. This contains a working version of LogStash and you can run LogStash and the Solr Output Writer from this directory.
 
-2. Copy provided ManagedIndexSchemaFactory configured logstash_logs directory to your Solr collection folder.  If you rename the folder, also appropriately modify the core.properties.
+2. Copy provided ManagedIndexSchemaFactory configured logstash_logs directory to your Solr collection folder.
+If you rename the folder, also appropriately modify the core.properties.
 
-3. If you are on a older version of Solr (before 4.4), go to the Solr Admin Page and add a new core.  In the name and instanceDir fields enter: logstash_logs. Accept the defaults for the remaining fields and click on the 'Add Core' button.
+3. If you are on a older version of Solr (before 4.4), go to the Solr Admin Page and add a new core.
+In the name and instanceDir fields enter: logstash_logs. Accept the defaults for the remaining fields and click on the 'Add Core' button.
 
 4. For a start-up example, we will use syslogs:
    Open lw_solr_syslog.conf in a text editor.  In the 'input' section of the config file add the path to your log file[s] by changing path => [ "/var/log/system.log" ]
@@ -37,7 +39,7 @@ The MANUAL.txt file located in the logstash_deploy folder contains more details 
 To build the solrlogmanager*.jar yourself you'll need Maven.  Then run:
 
 1. mvn package
-1. Next, copy target/solrlogmanager*.jar to the logstash_deploy directory
+1. cp target/solrlogmanager*.jar logstash_deploy/solrlogmanager.jar
 
 
 	

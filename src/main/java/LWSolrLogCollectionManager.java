@@ -19,16 +19,17 @@
 
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrServer;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
-import org.apache.solr.client.solrj.request.QueryRequest;
+import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.ContentStreamBase;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -104,17 +105,26 @@ public class LWSolrLogCollectionManager {
   /**
    * Add new field to Solr schema if field does not already exist.
    *
-   * @param key the field name
-   * @param val the field creation string.
+   * @param name the field name
+   * @param type the field creation string.
    * @throws Exception
    */
-  public void createSchemaField(String key, String val) throws Exception {
+  public void createSchemaField(String name, String type, boolean stored, boolean indexed) throws Exception {
 
     ModifiableSolrParams params = new ModifiableSolrParams();
     //TODO: add the fields
-    SolrRequest request = new QueryRequest(params);
-    //request.setMethod(SolrRequest.METHOD.POST);
-    //params.add();
+    ContentStreamUpdateRequest request = new ContentStreamUpdateRequest("/schema");
+    String json = "{ \"add-field\" : { \"name\":" +
+            name +
+            ", \"type\":" +
+            type +
+            ", \"stored\":" +
+            stored +
+            ", \"indexed\":" +
+            indexed +
+            " } }";
+    request.addContentStream(new ContentStreamBase.StringStream(json));
+    UpdateResponse response = request.process(solr);
     request.setPath(fieldsPath);
 
     solr.request(request);
@@ -212,8 +222,8 @@ public class LWSolrLogCollectionManager {
       if (buffer.isEmpty() == false) {
         try {
           sendBuffer();
-          if (solr instanceof ConcurrentUpdateSolrServer){
-            ((ConcurrentUpdateSolrServer)solr).blockUntilFinished();
+          if (solr instanceof ConcurrentUpdateSolrServer) {
+            ((ConcurrentUpdateSolrServer) solr).blockUntilFinished();
           }
         } catch (SolrServerException e) {
           maybeRetry(e);

@@ -6,12 +6,12 @@ require "time"
 require 'active_support'
 require "pry"
 
-require "lucidworks.jar"
+require "solrlogmanager.jar"
 
 
-# LucidWorks output that pushes Logstash collected logs to Solr. 
+# Lucidworks output that pushes Logstash collected logs to Solr.
 #
-# You can learn more about LucidWorks and Solr at <http://www.lucidworks.com/>
+# You can learn more about Lucidworks and Solr at <http://www.lucidworks.com/>
 class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
 	include Stud::Buffer
 
@@ -20,12 +20,14 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
   
   # The config values are set here to default settings.  They are overridden by the 
   # logstash conf file settings.
+
+  config :zk_host, :validate => :string, :default => "localhost:2181"
   
   # Solr host 
-  config :collection_host, :validate => :string, :default => "localhost"
+  config :collection_host, :validate => :string
 
   # Port (default solr port = 8983)
-  config :collection_port, :validate => :number, :default => 8983
+  config :collection_port, :validate => :number
   
   # Collection name 
   config :collection_name, :validate => :string, :default => "collection1"
@@ -50,6 +52,10 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
   # the number of buffered events is smaller than flush_size
   config :idle_flush_time, :validate => :number, :default => 1
 
+  config :queue_size, :validate => :number, :default => 500
+
+  config :id_field, :validate => :string, :default => "id"
+
   @lucidworks
  
   public
@@ -61,11 +67,12 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
     # As a convenience we here try to insure that two mandatory SiLK fields exist and if they do not we will try and 
     # have Solr create them.
     #
-   
-    @lucidworks.init(@collection_host, @collection_port, @collection_name, @force_commit)
+
+    default_params = Hash.new
+    @lucidworks.init(@zk_host, @id_field, @collection_name, @force_commit, default_params, queue_size)
  
-  	@lucidworks.createSchemaField(@field_prefix + "timestamp", "\"type\":\"tdate\",\"name\":\"" + @field_prefix + "timestamp" + "\",\"stored\":true,\"indexed\":true")
-  	@lucidworks.createSchemaField(@field_prefix + "version", "\"type\":\"long\",\"name\":\"" + @field_prefix + "version" + "\",\"stored\":true,\"indexed\":true")
+  	@lucidworks.createSchemaField(@field_prefix + "timestamp", "tdate", true, true)
+  	@lucidworks.createSchemaField(@field_prefix + "version", "long", true, true)
    
     buffer_initialize(
       :max_items => @flush_size,
