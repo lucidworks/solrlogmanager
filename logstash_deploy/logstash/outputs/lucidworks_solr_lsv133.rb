@@ -6,13 +6,18 @@ require "time"
 require 'active_support'
 require "pry"
 
-require "solrlogmanager.jar"
+Dir["jars/*.jar"].each { |jar| require jar }
+
+# for development, easiest to import the JAR that Maven built,
+# instead of:
+#require "solrlogmanager.jar"
+Dir["../target/*.jar"].each { |jar| require jar }
 
 
 # Lucidworks output that pushes Logstash collected logs to Solr.
 #
 # You can learn more about Lucidworks and Solr at <http://www.lucidworks.com/>
-class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
+class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
 	include Stud::Buffer
 
   config_name "lucidworks_solr_lsv133"
@@ -30,7 +35,7 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
   config :collection_port, :validate => :number
   
   # Collection name 
-  config :collection_name, :validate => :string, :default => "collection1"
+  config :collection_name, :validate => :string
 
   # Prefix will replace the @ in logstash fieldnames @timestash and @version.
   config :field_prefix, :validate => :string, :default => "logstash_"
@@ -60,19 +65,22 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
  
   public
   def register
-
     @lucidworks = Java::LWSolrLogCollectionManager.new()
 
     # All fields are expected to either already be defined in the collection schema.  Or, expect that a managed-schema is being used.
-    # As a convenience we here try to insure that two mandatory SiLK fields exist and if they do not we will try and 
+    # As a convenience we here try to ensure that two mandatory SiLK fields exist and if they do not we will try and
     # have Solr create them.
-    #
 
-    default_params = Hash.new
-    @lucidworks.init(@zk_host, @id_field, @collection_name, @force_commit, default_params, queue_size)
- 
-  	@lucidworks.createSchemaField(@field_prefix + "timestamp", "tdate", true, true)
-  	@lucidworks.createSchemaField(@field_prefix + "version", "long", true, true)
+    default_params = nil # was Hash.new - LWSolrLogCollectionManager does more object creation when params not null
+
+    # public void init(String zkHost, String idField, String collection, boolean forceCommit, SolrParams defaultParams, int queueSize) {
+    #@lucidworks.init(@zk_host, @id_field, @collection_name, @force_commit, default_params, @queue_size)
+
+    # public void init(String solrURL, String idField, String collection, int queueSize, int threadCount, boolean forceCommit, SolrParams defaultParams)
+    @lucidworks.init("http://localhost:8983/solr/", @id_field, @collection_name, @queue_size, 1, @force_commit, default_params)
+
+  	#@lucidworks.createSchemaField(@field_prefix + "timestamp", "tdate", true, true)
+  	#@lucidworks.createSchemaField(@field_prefix + "version", "long", true, true)
    
     buffer_initialize(
       :max_items => @flush_size,
@@ -113,7 +121,8 @@ class LogStash::Outputs::LucidWorks < LogStash::Outputs::Base
     }
     
     begin
-      s = @lucidworks.addSolrDocument(java.util.HashMap.new(solrfields))
+      #s = @lucidworks.addSolrDocument(java.util.HashMap.new(solrfields))
+      puts "Lucidworks RECEIVE: #{solrfields}"
       #buffer_receive(s)
     rescue Exception => e
       puts "Exception occured constructing new solr document - " + e.message  

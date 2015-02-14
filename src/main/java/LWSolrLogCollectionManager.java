@@ -63,25 +63,18 @@ public class LWSolrLogCollectionManager {
   protected int bufferSize;
   protected ModifiableSolrParams params = null;
 
+  /**
+   * SolrCloud mode init
+   */
   public void init(String zkHost, String idField, String collection, boolean forceCommit, SolrParams defaultParams, int queueSize) {
     solr = new CloudSolrServer(zkHost);
     ((CloudSolrServer) solr).setDefaultCollection(collection);
     sharedInit(idField, collection, forceCommit, defaultParams, queueSize);
   }
 
-  private void sharedInit(String idField, String collection, boolean forcecommit, SolrParams defaultParams, int queueSize) {
-    this.params = new ModifiableSolrParams(defaultParams);
-    this.idField = idField != null ? idField : "id";
-    this.collection = collection;
-    this.forceCommit = forcecommit;
-    bufferSize = queueSize;
-    if (bufferSize > 0) {
-      buffer = new ArrayList<SolrInputDocument>(bufferSize);
-    } else {
-      buffer = new ArrayList<SolrInputDocument>();
-    }
-  }
-
+  /**
+   * Non-SolrCloud / Standard HTTP mode init
+   */
   public void init(String solrURL, String idField, String collection, int queueSize, int threadCount, boolean forceCommit,
                    SolrParams defaultParams) {
 
@@ -102,6 +95,20 @@ public class LWSolrLogCollectionManager {
     //addNewDocPath = "http://" + host + ":" + port + "/solr/" + collection + update;
   }
 
+  private void sharedInit(String idField, String collection, boolean forcecommit, SolrParams defaultParams, int queueSize) {
+    this.params = new ModifiableSolrParams(defaultParams);
+    this.idField = idField != null ? idField : "id";
+    this.collection = collection;
+    this.forceCommit = forcecommit;
+    bufferSize = queueSize;
+    if (bufferSize > 0) {
+      buffer = new ArrayList<SolrInputDocument>(bufferSize);
+    } else {
+      buffer = new ArrayList<SolrInputDocument>();
+    }
+  }
+
+
   /**
    * Add new field to Solr schema if field does not already exist.
    *
@@ -112,7 +119,6 @@ public class LWSolrLogCollectionManager {
   public void createSchemaField(String name, String type, boolean stored, boolean indexed) throws Exception {
 
     ModifiableSolrParams params = new ModifiableSolrParams();
-    //TODO: add the fields
     ContentStreamUpdateRequest request = new ContentStreamUpdateRequest("/schema");
     String json = "{ \"add-field\" : { \"name\":" +
             name +
