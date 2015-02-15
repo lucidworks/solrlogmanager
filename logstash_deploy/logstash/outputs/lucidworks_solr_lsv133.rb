@@ -4,14 +4,13 @@ Dir["jars/*.jar"].each { |jar| require jar }
 # instead of:
 #require "solrlogmanager.jar"
 Dir["../target/solrlogmanager*.jar"].each { |jar| require jar }
+
 require "logstash/namespace"
 require "logstash/outputs/base"
 require "net/http"
 
 require "time"
 require 'active_support'
-require "pry"
-
 
 
 # Lucidworks output that pushes Logstash collected logs to Solr.
@@ -77,18 +76,11 @@ class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
     #@lucidworks.init(@zk_host, @id_field, @collection_name, @force_commit, default_params, @queue_size)
 
     # public void init(String solrURL, String idField, String collection, int queueSize, int threadCount, boolean forceCommit, SolrParams defaultParams)
-    @lucidworks.init("http://localhost:8983/solr/", @id_field, @collection_name, @queue_size, 0, @force_commit, default_params)
+    @lucidworks.init("http://localhost:8983/solr/", @id_field, @collection_name, @queue_size, 1, @force_commit, default_params)
 
   	#@lucidworks.createSchemaField(@field_prefix + "timestamp", "tdate", true, true)
   	#@lucidworks.createSchemaField(@field_prefix + "version", "long", true, true)
    
-=begin
-    buffer_initialize(
-      :max_items => @flush_size,
-      :max_interval => @idle_flush_time,
-      :logger => @logger
-    )
-=end
   end # def register
 
   public
@@ -127,28 +119,8 @@ class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
     rescue Exception => e
       puts "Exception occurred constructing new solr document - " + e.message
     end
-    #binding.pry
   end # def receive
   
-  def flush(events, teardown=false)
-    puts "Lucidworks FLUSH: #{solrfields}"
-
-    # TODO: LET SOLR HANDLE THIS STUFF
-=begin
-  	begin
-   		documents = "" 
-    	events.each do |event|
-    		documents += event
-    	end
-
-   		@lucidworks.flushDocs(documents)
- 
-  	rescue Exception => e
-    	@logger.warn("An error occurred while flushing events: #{e.message}")
-		end
-=end
-  end #def flush
-
   def teardown
     puts "Lucidworks TEARDOWN"
     @lucidworks.close
