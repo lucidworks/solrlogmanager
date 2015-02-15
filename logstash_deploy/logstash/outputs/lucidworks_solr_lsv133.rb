@@ -1,24 +1,24 @@
-require "logstash/namespace"
-require "logstash/outputs/base"
-require "net/http"
-require "stud/buffer"
-require "time"
-require 'active_support'
-require "pry"
-
 Dir["jars/*.jar"].each { |jar| require jar }
 
 # for development, easiest to import the JAR that Maven built,
 # instead of:
 #require "solrlogmanager.jar"
-Dir["../target/*.jar"].each { |jar| require jar }
+Dir["../target/solrlogmanager*.jar"].each { |jar| require jar }
+require "logstash/namespace"
+require "logstash/outputs/base"
+require "net/http"
+
+require "time"
+require 'active_support'
+require "pry"
+
 
 
 # Lucidworks output that pushes Logstash collected logs to Solr.
 #
 # You can learn more about Lucidworks and Solr at <http://www.lucidworks.com/>
 class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
-	include Stud::Buffer
+
 
   config_name "lucidworks_solr_lsv133"
   milestone 1
@@ -82,11 +82,13 @@ class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
   	#@lucidworks.createSchemaField(@field_prefix + "timestamp", "tdate", true, true)
   	#@lucidworks.createSchemaField(@field_prefix + "version", "long", true, true)
    
+=begin
     buffer_initialize(
       :max_items => @flush_size,
       :max_interval => @idle_flush_time,
       :logger => @logger
     )
+=end
   end # def register
 
   public
