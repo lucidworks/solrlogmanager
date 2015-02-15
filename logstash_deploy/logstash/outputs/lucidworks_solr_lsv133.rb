@@ -153,7 +153,7 @@ class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
 
   def teardown
     puts "Lucidworks TEARDOWN"
-    @lucid.close
+    @lucidworks.close
 
     super
   end
