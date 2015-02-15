@@ -100,11 +100,14 @@ public class LWSolrLogCollectionManager {
     this.idField = idField != null ? idField : "id";
     this.collection = collection;
     this.forceCommit = forcecommit;
+    if (forcecommit){
+      this.params.add("commit", "true");
+    }
     bufferSize = queueSize;
     if (bufferSize > 0) {
-      buffer = new ArrayList<SolrInputDocument>(bufferSize);
+      buffer = new ArrayList<>(bufferSize);
     } else {
-      buffer = new ArrayList<SolrInputDocument>();
+      buffer = new ArrayList<>();
     }
   }
 
@@ -116,9 +119,7 @@ public class LWSolrLogCollectionManager {
    * @param type the field creation string.
    * @throws Exception
    */
-  public void createSchemaField(String name, String type, boolean stored, boolean indexed) throws Exception {
-
-    ModifiableSolrParams params = new ModifiableSolrParams();
+  public UpdateResponse createSchemaField(String name, String type, boolean stored, boolean indexed) throws Exception {
     ContentStreamUpdateRequest request = new ContentStreamUpdateRequest("/schema");
     String json = "{ \"add-field\" : { \"name\":" +
             name +
@@ -130,10 +131,8 @@ public class LWSolrLogCollectionManager {
             indexed +
             " } }";
     request.addContentStream(new ContentStreamBase.StringStream(json));
-    UpdateResponse response = request.process(solr);
-    request.setPath(fieldsPath);
+    return request.process(solr);
 
-    solr.request(request);
   }
 
 
