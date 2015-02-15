@@ -123,9 +123,7 @@ class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
     }
     
     begin
-      #s = @lucidworks.addSolrDocument(java.util.HashMap.new(solrfields))
-      puts "Lucidworks RECEIVE: #{solrfields}"
-      #buffer_receive(s)
+      @lucidworks.addSolrDocument(java.util.HashMap.new(solrfields))
     rescue Exception => e
       puts "Exception occurred constructing new solr document - " + e.message
     end
