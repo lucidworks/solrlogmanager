@@ -49,15 +49,12 @@ import java.util.UUID;
  */
 
 public class LWSolrLogCollectionManager {
-  private String fieldsPath = "";
-  private String addNewDocPath = "";
-
   protected SolrServer solr;
   protected boolean forceCommit = false;
   protected String idField;
   protected String collection;
   protected Collection<SolrInputDocument> buffer;
-  protected boolean commitOnClose;
+  protected boolean commitOnClose = true;
   protected int maxRetries = 3;
   protected int sleep = 5000;
   protected int bufferSize;
@@ -117,8 +114,6 @@ public class LWSolrLogCollectionManager {
    * @throws Exception
    */
   public void createSchemaField(String name, String type, boolean stored, boolean indexed) throws Exception {
-
-    ModifiableSolrParams params = new ModifiableSolrParams();
     ContentStreamUpdateRequest request = new ContentStreamUpdateRequest("/schema");
     String json = "{ \"add-field\" : { \"name\":" +
             name +
@@ -131,7 +126,7 @@ public class LWSolrLogCollectionManager {
             " } }";
     request.addContentStream(new ContentStreamBase.StringStream(json));
     UpdateResponse response = request.process(solr);
-    request.setPath(fieldsPath);
+    request.setPath("");
 
     solr.request(request);
   }
