@@ -77,7 +77,7 @@ class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
     #@lucidworks.init(@zk_host, @id_field, @collection_name, @force_commit, default_params, @queue_size)
 
     # public void init(String solrURL, String idField, String collection, int queueSize, int threadCount, boolean forceCommit, SolrParams defaultParams)
-    @lucidworks.init("http://localhost:8983/solr/", @id_field, @collection_name, @queue_size, 1, @force_commit, default_params)
+    @lucidworks.init("http://localhost:8983/solr/", @id_field, @collection_name, @queue_size, 0, @force_commit, default_params)
 
   	#@lucidworks.createSchemaField(@field_prefix + "timestamp", "tdate", true, true)
   	#@lucidworks.createSchemaField(@field_prefix + "version", "long", true, true)
@@ -125,12 +125,14 @@ class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
       puts "Lucidworks RECEIVE: #{solrfields}"
       #buffer_receive(s)
     rescue Exception => e
-      puts "Exception occured constructing new solr document - " + e.message  
+      puts "Exception occurred constructing new solr document - " + e.message
     end
     #binding.pry
   end # def receive
   
   def flush(events, teardown=false)
+    puts "Lucidworks FLUSH: #{solrfields}"
+
     # TODO: LET SOLR HANDLE THIS STUFF
 =begin
   	begin
@@ -146,4 +148,12 @@ class LogStash::Outputs::Lucidworks < LogStash::Outputs::Base
 		end
 =end
   end #def flush
+
+  def teardown
+    puts "Lucidworks TEARDOWN"
+    @lucid.close
+
+    super
+  end
+
 end 
