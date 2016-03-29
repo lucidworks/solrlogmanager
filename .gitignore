@@ -3,5 +3,8 @@
 .project
 /bin
 *.bak
-
-
+*.gem
+Gemfile.lock
+Gemfile.bak
+.bundle
+vendor

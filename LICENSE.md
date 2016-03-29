@@ -1,4 +1,4 @@
-Copyright 2013-2014 LucidWorks, Inc.
+Copyright 2013-2016 Lucidworks, Inc.
 
 
 Licensed under the Apache License, Version 2.0 (the "License"); you
